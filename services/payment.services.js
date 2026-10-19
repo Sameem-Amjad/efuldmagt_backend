@@ -33,7 +33,7 @@ const stripeCheckout = {
       client_reference_id: String(orderId),
       // The success page verifies the id in ?orderId=, so Stripe fills in its session id.
       success_url: `${FRONTEND_URL}/payment-success?orderId={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${FRONTEND_URL}/payment-failed`,
+      cancel_url: `${FRONTEND_URL}/payment-failed?error=${encodeURIComponent("Payment cancelled. Nothing was charged.")}`,
     });
     return session.url;
   },
