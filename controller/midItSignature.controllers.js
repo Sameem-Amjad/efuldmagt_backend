@@ -1,5 +1,6 @@
 const SignatureService = require("../services/midItSignature.service");
 const { s3 } = require("../services/aws-bucket.services");
+const supabaseStorage = require("../services/supabaseStorage.service");
 const createHttpError = require("http-errors");
 
 const createSignatureOrder = async (req, res, next) => {
@@ -72,7 +73,9 @@ const handleCallback = async (req, res) => {
             // ACL: 'public-read' // Uncomment if you want the file to be publicly readable
         };
 
-        let uploadResult = await s3.upload(s3UploadParams).promise();
+        let uploadResult = supabaseStorage.isSupabaseStorage()
+            ? { Location: await supabaseStorage.uploadObject(s3UploadParams.Key, s3UploadParams.Body, s3UploadParams.ContentType) }
+            : await s3.upload(s3UploadParams).promise();
 
         // console.log(`Successfully signed and saved PDF to: ${uploadResult.Location}`);
 

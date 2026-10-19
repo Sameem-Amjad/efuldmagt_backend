@@ -14,6 +14,11 @@ const adminSchema = new Schema({
   password: {
     type: String,
     required: true
+  },
+  // Public-demo admin: can read, add and edit, but not delete (see demoGuard).
+  noDelete: {
+    type: Boolean,
+    default: false
   }
 });
 

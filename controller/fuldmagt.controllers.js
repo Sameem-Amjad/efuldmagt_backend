@@ -7,6 +7,7 @@ const Fuldmagt = require("../models/fuldmagt");
 const fuldmagtServices = require("../services/fuldmagt.services");
 const FulmagtForm = require("../models/fuldmagtForm");
 const createHttpError = require("http-errors");
+const mongoose = require("mongoose");
 const { dataResponse } = require("../utils/responses");
 const { getFuldmagts } = require("../repositories/fuldmagt.repositories");
 const Notification = require("../models/notification");
@@ -344,21 +345,19 @@ const fuldmagtController = {
             let fuldmagt = await Fuldmagt.findById(fuldmagtId);
 
             if (!fuldmagt) {
-                let fuldmagtRequest = await fuldmagtServices.deleteSpecificFuldmagtRequestByAdmin(fuldmagtId);
-                if (fuldmagtRequest) {
-                    return res.status(400).send({
-                        success: true,
-                        message: " Fuldmagt Request deleted successfully"
-                    });
-                }
+                // Not an e-fuldmagt: it may be a request (the admin list shows both).
+                // The service throws 404 when neither exists.
+                await fuldmagtServices.deleteSpecificFuldmagtRequestByAdmin(fuldmagtId);
+                return res.status(200).send({
+                    success: true,
+                    message: "Fuldmagt Request deleted successfully"
+                });
             }
-            if (fuldmagt.fuldmagtDocumentsLink.length > 0) {
-                fuldmagt.fuldmagtDocumentsLink.forEach(async (document) => {
-                    let documentKey = document.fuldmagtDocumentKey;
-                    //Delete from S3 Bucket
-                    if (documentKey)
-                        await deleteFileFromS3(documentKey);
-                })
+            for (const document of fuldmagt.fuldmagtDocumentsLink || []) {
+                let documentKey = document.fuldmagtDocumentKey;
+                //Delete from S3 Bucket (a storage error must not fail the delete, nor go unhandled)
+                if (documentKey)
+                    await deleteFileFromS3(documentKey).catch((e) => console.error("Failed to delete fuldmagt document", documentKey, e.message));
             }
             await Fuldmagt.findByIdAndDelete(fuldmagtId);
             await Notification.deleteMany({ "data.fuldmagtId": mongoose.Types.ObjectId(fuldmagtId) });
@@ -369,7 +368,7 @@ const fuldmagtController = {
             });
         }
         catch (err) {
-            return res.status(500).send({
+            return res.status(err.status || 500).send({
                 success: false,
                 message: err.message
             });

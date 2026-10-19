@@ -411,6 +411,13 @@ const userServices = {
         delete updateUserObj.refreshTokens;
         delete updateUserObj.email;
         delete updateUserObj.phone;
+        // A user edits their own profile here (name, address, image, signature, date of birth).
+        // Account flags and links are not theirs to set: e.g. `company` would attach any company to
+        // the account, `isDemo: false` would lift the demo protections, `mitIdVerified` fakes MitID.
+        for (const field of ["admin", "isDemo", "locked", "adminLocked", "deleted", "loginAttempt", "company",
+            "mitIdVerified", "mitIdData", "lastUpdatedPassword", "notificationIds", "deviceId", "createdAt"]) {
+            delete updateUserObj[field];
+        }
 
         let updatedUser = await userRepository.updateUser(userId, updateUserObj);
 
@@ -706,6 +713,11 @@ const userServices = {
         }
         if (user.deleted) {
             throw createHttpError.BadRequest("User has been deleted");
+        }
+        // Shared demo accounts keep PIN 2026. Checked here as well as on the forgot-password send route,
+        // because an OTP token from the sign-up route (/user/sendOTP) is accepted by this step too.
+        if (user.isDemo) {
+            throw createHttpError.Forbidden("This is a shared demo account, so its passcode can't be reset. Use PIN 2026.");
         }
 
         let createPasswordToken = jwt.sign({ userId: user._id }, process.env.CREATE_PASSWORD_TOKEN, { expiresIn: "10m" });

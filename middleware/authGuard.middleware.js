@@ -59,10 +59,13 @@ function authGuard(accountType) {
       if (req.company) {
         const companyData = await companyServices.getCompanyById(req.company);
 
-        if (companyData.adminLocked) {
+        // The user's company was deleted (an admin delete removes the document but not user.company):
+        // carry on as a plain user instead of failing every request on companyData being null.
+        if (!companyData) {
+          req.company = undefined;
+        } else if (companyData.adminLocked) {
           throw createHttpError.Unauthorized("Company account is locked by admin");
-        }
-        if (companyData.locked) {
+        } else if (companyData.locked) {
           throw createHttpError.Unauthorized("Company account is locked");
         }
       }

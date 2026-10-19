@@ -35,7 +35,9 @@ class App {
             "https://admin.e-fuldmagt.com",
             "https://app.e-fuldmagt.com",
             "http://localhost:5173",
-            "http://localhost:5174"
+            "http://localhost:5174",
+            // Extra origins, comma-separated (e.g. a demo deployment's website and admin)
+            ...(process.env.CORS_ORIGINS || "").split(",").map((o) => o.trim()).filter(Boolean),
           ];
           if (!origin || allowedOrigins.includes(origin)) {
             callback(null, true);
@@ -43,7 +45,7 @@ class App {
             callback(new Error("Not allowed by CORS"));
           }
         },
-        methods: ["GET", "POST", "PUT", "DELETE"],
+        methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
         credentials: false,
       })
     );

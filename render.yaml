@@ -1,0 +1,69 @@
+# Public demo of the e-fuldmagt API (Render Blueprint). Deploy from the `demo` branch.
+# The website and admin are on Vercel; their URLs go in CORS_ORIGINS and FRONTEND_URL.
+# Free plan: the service sleeps after ~15 idle minutes and takes about a minute to wake.
+services:
+  - type: web
+    name: efuldmagt-demo-api
+    runtime: node
+    plan: free
+    region: frankfurt
+    branch: demo
+    buildCommand: npm ci
+    startCommand: node src/server.js
+    healthCheckPath: /
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: NODE_ENV
+        value: production
+      # Demo mode: every OTP is this code, so visitors can sign up without email or SMS.
+      # With EMAIL_ID unset, emails are written to the log instead of being sent.
+      - key: DEMO_FIXED_OTP
+        value: "1234"
+      - key: FRONTEND_URL
+        value: https://efuldmagt-demo.vercel.app
+      - key: CORS_ORIGINS
+        value: https://efuldmagt-demo.vercel.app,https://efuldmagt-admin-demo.vercel.app
+      # Secrets: paste the values in the Render dashboard (Environment → Add from .env).
+      - { key: MONGO_CONNECTION, sync: false }
+      - { key: AUTHORIZATION_TOKEN, sync: false }
+      - { key: JWT_AUTHENTICATION_TOKEN_EXPIRATION, sync: false }
+      - { key: REFRESH_TOKEN, sync: false }
+      - { key: OTP_TOKEN_SECRET, sync: false }
+      - { key: ENCRYPTION_KEY, sync: false }
+      - { key: SIGNUP_TOKEN_SECRET, sync: false }
+      - { key: CREATE_PASSWORD_TOKEN, sync: false }
+      - { key: ADD_COMPANY_TOKEN, sync: false }
+      - { key: FULDMAGT_TOKEN, sync: false }
+      - { key: TOKEN_SECRET, sync: false }
+      - { key: SESSION_SECRET, sync: false }
+      - { key: FIREBASE_TYPE, sync: false }
+      - { key: FIREBASE_PROJECT_ID, sync: false }
+      - { key: FIREBASE_PRIVATE_KEY_ID, sync: false }
+      - { key: FIREBASE_PRIVATE_KEY, sync: false }
+      - { key: FIREBASE_CLIENT_EMAIL, sync: false }
+      - { key: FIREBASE_CLIENT_ID, sync: false }
+      - { key: FIREBASE_AUTH_URI, sync: false }
+      - { key: FIREBASE_TOKEN_URI, sync: false }
+      - { key: FIREBASE_AUTH_PROVIDER_X509_CERT_URL, sync: false }
+      - { key: FIREBASE_CLIENT_X509_CERT_URL, sync: false }
+      - { key: FIREBASE_UNIVERSE_DOMAIN, sync: false }
+      - { key: APIKEY, sync: false }
+      - { key: AUTHDOMAIN, sync: false }
+      - { key: PROJECTID, sync: false }
+      - { key: STORAGEBUCKET, sync: false }
+      - { key: MESSAGINGSENDERID, sync: false }
+      - { key: APPID, sync: false }
+      - { key: MEASUREMENTID, sync: false }
+      - { key: SUPABASE_URL, sync: false }
+      - { key: SUPABASE_SERVICE_ROLE_KEY, sync: false }
+      - { key: SUPABASE_BUCKET, sync: false }
+      - { key: CRIIPTO_MIDIT_DOMAIN, sync: false }
+      - { key: CRIIPTO_MIDIT_CLIENT_ID, sync: false }
+      - { key: CRIIPTO_MIDIT_CLIENT_SECRET, sync: false }
+      - { key: CRIIPTO_MIDIT_REDIRECT_URI, sync: false }
+      - { key: CRIPTO_MIDIT_SIGNATURE_CLIENT_ID, sync: false }
+      - { key: CRIPTO_MIDIT_SIGNATURE_SECRET, sync: false }
+      - { key: CRIPTO_MIDIT_SIGNATURES_CALLBACK_URL, sync: false }
+      - { key: BASE_URL, sync: false }
+      - { key: OPENAPI_SPEC_URL, sync: false }

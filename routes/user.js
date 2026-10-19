@@ -11,6 +11,7 @@ const {
 } = require("../services/S3_ServiceStorage.js");
 const User = require("../models/user");
 const authGuard = require("../middleware/authGuard.middleware");
+const { demoUserGuard, demoCredentialsGuard } = require("../middleware/demoGuard.middleware");
 const notificationController = require("../controller/notification.controllers");
 const {
   decode64FileMiddleware,
@@ -35,6 +36,7 @@ userRouter.post(
 );
 userRouter.post(
   "/forget-password/sendOTP",
+  demoCredentialsGuard,
   errorHandler(userOtpController.sendForgotPasswordOTPToCredentials)
 );
 userRouter.post(
@@ -48,11 +50,13 @@ userRouter.post(
 userRouter.put(
   "/updateEmail",
   authGuard("user"),
+  demoUserGuard,
   errorHandler(userOtpController.verifyUpdateEmailOtp)
 );
 userRouter.put(
   "/updatePhoneNumber",
   authGuard("user"),
+  demoUserGuard,
   errorHandler(userOtpController.verifyUpdatePhoneNumberOtp)
 );
 
@@ -81,6 +85,7 @@ userRouter.get(
 userRouter.delete(
   "/deactivateAccount",
   authGuard("user"),
+  demoUserGuard,
   errorHandler(userController.deactivateAccount)
 );
 userRouter.put(
@@ -91,6 +96,7 @@ userRouter.put(
 userRouter.put(
   "/setPassword/",
   authGuard("user"),
+  demoUserGuard,
   errorHandler(userController.setPassword)
 );
 userRouter.put(

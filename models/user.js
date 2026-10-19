@@ -49,6 +49,11 @@ const userSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  // Shared public-demo account: login details and the account itself can't be changed (see demoGuard).
+  isDemo: {
+    type: Boolean,
+    default: false,
+  },
   adminLocked: {
     type: Boolean,
     default: false,

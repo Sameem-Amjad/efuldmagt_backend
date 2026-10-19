@@ -1,5 +1,7 @@
 
 function generateOTP(){
+    // Public demo deployments can set a fixed code so visitors can sign up without email or SMS.
+    if (process.env.DEMO_FIXED_OTP) return Number(process.env.DEMO_FIXED_OTP);
     var val = Math.floor(1000 + Math.random() * 9000);
     return val;
 }

@@ -1,5 +1,6 @@
 const AWS = require("aws-sdk");
 const createHttpError = require("http-errors");
+const supabaseStorage = require("./supabaseStorage.service");
 const region = "eu-north-1";
 
 const validBucketNames = ["efulmagtsimages"];
@@ -66,6 +67,15 @@ const handlePresignedUrlRequest = async ({ fileName, fileExtension }) => {
     throw createHttpError.BadRequest(
       "Missing required parameters: 'fileName' and 'fileExtension'"
     );
+  }
+
+  if (supabaseStorage.isSupabaseStorage()) {
+    if (!validFileExtensions.includes(fileExtension)) {
+      throw createHttpError.BadRequest(
+        `Invalid file extension. Allowed values: ${validFileExtensions.join(", ")}`
+      );
+    }
+    return supabaseStorage.createSignedUpload(`uploads/${fileName}.${fileExtension}`);
   }
 
   const imageUploadOptions = {

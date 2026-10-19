@@ -69,6 +69,8 @@ const fuldmagtRequestRepository = {
                 $addFields: {
                     title: "$fuldmagtForm.title",
                     icon: "$fuldmagtForm.icon",
+                    additionalFields: "$fuldmagtForm.additionalFields", // field keys, so the statement can be filled by name
+                    additionalFieldsType: "$fuldmagtForm.additionalFieldsType",
                     fuldmagt_image: "$fuldmagtForm.fuldmagt_image",
                     purchaseType: "$fuldmagtForm.purchaseType",
                     price: "$fuldmagtForm.price",
@@ -108,6 +110,8 @@ const fuldmagtRequestRepository = {
                     $addFields: {
                         title: "$fuldmagtForm.title",
                         icon: "$fuldmagtForm.icon",
+                        additionalFields: "$fuldmagtForm.additionalFields", // field keys, so the statement can be filled by name
+                        additionalFieldsType: "$fuldmagtForm.additionalFieldsType",
                         fuldmagt_image: "$fuldmagtForm.fuldmagt_image",
                         purchaseType: "$fuldmagtForm.purchaseType",
                         price: "$fuldmagtForm.price",
@@ -185,6 +189,8 @@ const fuldmagtRequestRepository = {
                 $addFields: {
                     title: "$fuldmagtForm.title",
                     icon: "$fuldmagtForm.icon",
+                    additionalFields: "$fuldmagtForm.additionalFields", // field keys, so the statement can be filled by name
+                    additionalFieldsType: "$fuldmagtForm.additionalFieldsType",
                     fuldmagt_image: "$fuldmagtForm.fuldmagt_image",
                     purchaseType: "$fuldmagtForm.purchaseType",
                     price: "$fuldmagtForm.price",

@@ -1,10 +1,17 @@
 const nodemailer = require('nodemailer');
 
 async function sendEmail(email, subject, body) {
+    // No SMTP account (local dev, or a demo deployment without mail): print the email instead.
+    if (!process.env.EMAIL_ID) {
+        console.log(`[email not sent: EMAIL_ID unset] to=${email} subject="${subject}"\n` +
+            body.replace(/<(style|head)[\s\S]*?<\/\1>/gi, ' ').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+        return null;
+    }
+    const port = Number(process.env.EMAIL_PORT || 465);
     var mail = nodemailer.createTransport({
-        host: 'smtp.simply.com',
-        port: 465,
-        secure: true,
+        host: process.env.EMAIL_HOST || 'smtp.simply.com',
+        port,
+        secure: port === 465,
         auth: {
             user: process.env.EMAIL_ID, // Your email id
             pass: process.env.EMAIL_PASSWORD // Your password

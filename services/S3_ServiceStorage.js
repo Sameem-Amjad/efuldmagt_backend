@@ -11,8 +11,14 @@ const memoryStorage = multer.memoryStorage();
 const upload = multer({ storage: memoryStorage });
 const createHttpError = require("http-errors");
 const { S3Client, PutObjectCommand, DeleteObjectCommand } = require("@aws-sdk/client-s3");
+const supabaseStorage = require("./supabaseStorage.service");
 
 async function uploadFileToS3(filePath, fileName, file) {
+  if (supabaseStorage.isSupabaseStorage()) {
+    if (!file) throw new createHttpError.BadRequest("File doesn't exist");
+    const fileExtension = file.originalname.split(".").pop();
+    return supabaseStorage.uploadObject(`${filePath}/${fileName}.${fileExtension}`, file.buffer, file.mimetype);
+  }
   const s3Client = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
@@ -129,6 +135,7 @@ const uploadFileObjectToS3BucketByAdmin = async (fileObject) => {
 };
 
 async function deleteFileFromS3(fileKey) {
+  if (supabaseStorage.isSupabaseStorage()) return supabaseStorage.deleteObject(fileKey);
   const s3Client = new S3Client({
     region: process.env.AWS_REGION,
     credentials: {
