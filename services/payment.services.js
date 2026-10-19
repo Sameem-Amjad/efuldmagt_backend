@@ -8,8 +8,57 @@ const authHeader = `Basic ${Buffer.from(`:${QUICKPAY_USER_KEY}`).toString(
   "base64"
 )}`;
 
+// Demo deployments set STRIPE_SECRET_KEY to take payments with Stripe Checkout instead of
+// QuickPay. Only test keys are accepted, so a demo can never charge a real card.
+const STRIPE_SECRET_KEY = process.env.STRIPE_SECRET_KEY;
+if (STRIPE_SECRET_KEY && !/^(sk|rk)_test_/.test(STRIPE_SECRET_KEY)) {
+  throw new Error("STRIPE_SECRET_KEY must be a Stripe test key (sk_test_...)");
+}
+const stripe = STRIPE_SECRET_KEY ? new (require("stripe"))(STRIPE_SECRET_KEY) : null;
+
+const stripeCheckout = {
+  async createPaymentLink(orderId, amount, currency) {
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      line_items: [
+        {
+          quantity: 1,
+          price_data: {
+            currency: currency.toLowerCase(),
+            unit_amount: amount, // in øre, as sent by the website
+            product_data: { name: "e-fuldmagt" },
+          },
+        },
+      ],
+      client_reference_id: String(orderId),
+      // The success page verifies the id in ?orderId=, so Stripe fills in its session id.
+      success_url: `${FRONTEND_URL}/payment-success?orderId={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${FRONTEND_URL}/payment-failed`,
+    });
+    return session.url;
+  },
+
+  async verifyPayment(sessionId) {
+    const session = await stripe.checkout.sessions.retrieve(sessionId);
+    return {
+      status: session.payment_status === "paid" ? "Paid" : "Pending",
+      transactionId: session.payment_intent || session.id,
+      amount: session.amount_total || 0,
+      currency: (session.currency || "Unknown").toUpperCase(),
+    };
+  },
+};
+
 const paymentServices = {
   async createPaymentLink(orderId, amount, currency) {
+    if (stripe) {
+      try {
+        return await stripeCheckout.createPaymentLink(orderId, amount, currency);
+      } catch (error) {
+        console.error("Error creating Stripe checkout:", error.message);
+        throw new Error("Failed to create payment link");
+      }
+    }
     try {
 
       // Step 1: Create a payment
@@ -57,6 +106,14 @@ const paymentServices = {
   },
 
   async verifyPayment(orderId) {
+    if (stripe) {
+      try {
+        return await stripeCheckout.verifyPayment(orderId);
+      } catch (error) {
+        console.error("Error verifying Stripe payment:", error.message);
+        throw new Error("No payment found for this order ID");
+      }
+    }
     try {
       const response = await axios.get(`${BASE_URL}?order_id=${orderId}`, {
         headers: {

@@ -66,4 +66,6 @@ services:
       - { key: CRIPTO_MIDIT_SIGNATURE_SECRET, sync: false }
       - { key: CRIPTO_MIDIT_SIGNATURES_CALLBACK_URL, sync: false }
       - { key: BASE_URL, sync: false }
+      # Payments: a Stripe test key (sk_test_...) turns on Stripe Checkout; the card 4242 4242 4242 4242 pays.
+      - { key: STRIPE_SECRET_KEY, sync: false }
       - { key: OPENAPI_SPEC_URL, sync: false }
